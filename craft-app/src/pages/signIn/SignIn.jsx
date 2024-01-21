@@ -1,13 +1,22 @@
 // import React from "react";
-import { React, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
 import { Formik, Form, Field } from "formik";
+
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  // Button,
+  Checkbox,
+  // Form,
+  Input,
+} from "antd";
 
 import Button from "../../components/shared/ui/button/Button";
 // import Input from "../../components/shared/ui/input/Input";
 // import LoginForm from "./LoginForm";
-
+import "./SignIn.scss";
 import { ROUTES } from "../../components/shared/consts/routes";
+import signin from "../../components/shared/assets/img/ui/signIn.png";
 
 // function validateEmail(value) {
 //   if (!value) {
@@ -23,40 +32,88 @@ import { ROUTES } from "../../components/shared/consts/routes";
 //   }
 // }
 
+const END_POINT = "http://84.38.183.195/api/v1/auth/login/";
+const onFinish = (values) => {};
+
+// const onFinishFailed = (errorInfo) => {
+//   console.log("Failed:", errorInfo);
+// };
+
 const validationSchema = yup.object().shape({
-  email: yup.string().required("Required").email("Некорректный адрес почты"),
+  username: yup.string().required("Required"),
+  // email: yup.string().required("Required").email("Некорректный адрес почты"),
   password: yup.string().required("Required"),
 });
 
 const SignIn = () => {
   let navigate = useNavigate();
-  function handleLogin() {
-    navigate(ROUTES.ENTER);
+
+  function handleLogin(values) {
+    console.log(values);
+    navigate(ROUTES.MAIN);
+    const username = values.username;
+    const password = values.password;
+
+    const options = {
+      method: "post",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    };
+
+    fetch(END_POINT, options)
+      .then((response) => response.json())
+      .then((data) => console.log(data));
+
+    // message.success("Next step.");
   }
+
   return (
-    <section>
-      <div>
-        <h2>У нас много новинок</h2>
-        <h3>
-          Вдохновляйся работами мастеров. Участики нашего комьюнити делятся
-          полезной информацией и представляют свои работы.
-        </h3>
+    <section className="sign-in__wrap">
+      <div className="sign-in__image">
+        <img src={signin} alt="signin" />
       </div>
-      <div>
+      <div className="sign-in__form">
         <h2>Мы рады вас видеть!</h2>
         <Formik
+          className="login-form"
           validationSchema={validationSchema}
-          initialValues={{ email: "", password: "" }}
+          initialValues={{ username: "", password: "" }}
           onSubmit={(values) => {
-            handleLogin();
+            handleLogin(values);
           }}
+          // onFinish={onFinish}
+          // onFinishFailed={onFinishFailed}
         >
           {({ errors, touched }) => (
-            <Form>
-              <label>Электронная почта</label>
+            <Form
+              name="email"
+              label="E-mail"
+              rules={[
+                {
+                  type: "email",
+                  message: "The input is not valid E-mail!",
+                },
+                {
+                  required: true,
+                  message: "Введите Ваш email!",
+                },
+              ]}
+            >
+              <Input
+                placeholder="hello"
+                prefix={<UserOutlined className="site-form-item-icon" />}
+              />
+              {/* <label>Электронная почта</label> */}
               <Field
-                className="input"
-                name="email"
+                prefix={<UserOutlined className="site-form-item-icon" />}
+                placeholder="Ваш email"
+                // className="input"
+                name="username"
                 // validate={validateEmail}
               />
               {errors.email && touched.email && <div>{errors.email}</div>}
@@ -77,6 +134,7 @@ const SignIn = () => {
                 className="button button_colored"
                 btnText="Войти"
                 type="submit"
+                // type="button"
               />
             </Form>
           )}
